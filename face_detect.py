@@ -44,17 +44,15 @@ no_points = 8 * radius
 featureImage=[];
 for face in faceImages:
 	hist,bins = np.histogram(face.flatten(),256,[0,256]) 
-	cdf = hist.cumsum()
+	cdf = hist.cumsum() #cummulative sum
 	cdf_normalized = cdf * hist.max()/ cdf.max()
 	cdf_m = np.ma.masked_equal(cdf,0)
 	cdf_m = (cdf_m - cdf_m.min())*255/(cdf_m.max()-cdf_m.min())
 	cdf = np.ma.filled(cdf_m,0).astype('uint8')
 	cv2.imshow("faceHist", cdf[face]);
-	# cv2.waitKey(0);
 	cv2.imshow("face", face);
+	feat = local_binary_pattern(face, no_points, radius, method='ror')
+	cv2.imshow("features",feat)
 	cv2.waitKey(0);
-	# featureImage.append(local_binary_pattern(face, no_points, radius, method='ror'))
+	featureImage.append(feat)
 	
-for face in featureImage:
-	cv2.imshow("features",face)
-	cv2.waitKey(0);
