@@ -20,6 +20,20 @@ faceCascade = cv2.CascadeClassifier(cascPath)
 image = cv2.imread(imagePath)
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
+hist,bins = np.histogram(gray.flatten(),256,[0,256]) 
+	######## Histogram equalization
+cdf = hist.cumsum() #cummulative sum
+cdf_normalized = cdf * hist.max()/ cdf.max()
+cdf_m = np.ma.masked_equal(cdf,0)
+cdf_m = (cdf_m - cdf_m.min())*255/(cdf_m.max()-cdf_m.min())
+cdf = np.ma.filled(cdf_m,0).astype('uint8')
+equalizedFace=cdf[gray]
+	######## Median filter
+medianFace = median(equalizedFace,disk(1))
+
+cv2.imshow("grayscale", gray)
+cv2.imshow("faceHist", equalizedFace)
+cv2.imshow("median", medianFace)
 # Detect faces in the image
 faces = faceCascade.detectMultiScale(
     gray,
@@ -45,22 +59,12 @@ radius = 3
 no_points = 8 * radius
 featureImage=[];
 for face in faceImages:
-	hist,bins = np.histogram(face.flatten(),256,[0,256]) 
-	######## Histogram equalization
-	cdf = hist.cumsum() #cummulative sum
-	cdf_normalized = cdf * hist.max()/ cdf.max()
-	cdf_m = np.ma.masked_equal(cdf,0)
-	cdf_m = (cdf_m - cdf_m.min())*255/(cdf_m.max()-cdf_m.min())
-	cdf = np.ma.filled(cdf_m,0).astype('uint8')
-	equalizedFace=cdf[face]
-	######## Median filter
-	medianFace = median(cdf[face],disk(5))
+	
 	######## lbph filter extraction
-	feat = local_binary_pattern(medianFace, no_points, radius, method='ror')
+	feat = local_binary_pattern(face, no_points, radius, method='ror')
 
 	cv2.imshow("face", face)
-	cv2.imshow("faceHist", equalizedFace)
-	cv2.imshow("median",medianFace)
+
 	cv2.imshow("features",feat)
 	
 	cv2.waitKey(0);
