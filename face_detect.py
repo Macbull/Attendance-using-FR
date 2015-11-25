@@ -36,8 +36,8 @@ cv2.imshow("faceHist", equalizedFace)
 cv2.imshow("median", medianFace)
 # Detect faces in the image
 faces = faceCascade.detectMultiScale(
-    gray,
-    scaleFactor=1.1,
+    medianFace,
+    scaleFactor=1.5,
     minNeighbors=5,
     minSize=(30, 30),
     flags = cv2.cv.CV_HAAR_SCALE_IMAGE
