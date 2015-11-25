@@ -1,6 +1,6 @@
 import sys
 from skimage.feature import local_binary_pattern
-
+import numpy as np
 sys.path.append('/usr/local/lib/python2.7/site-packages')
 
 import cv2
@@ -43,9 +43,17 @@ radius = 3
 no_points = 8 * radius
 featureImage=[];
 for face in faceImages:
+	hist,bins = np.histogram(face.flatten(),256,[0,256]) 
+	cdf = hist.cumsum()
+	cdf_normalized = cdf * hist.max()/ cdf.max()
+	cdf_m = np.ma.masked_equal(cdf,0)
+	cdf_m = (cdf_m - cdf_m.min())*255/(cdf_m.max()-cdf_m.min())
+	cdf = np.ma.filled(cdf_m,0).astype('uint8')
+	cv2.imshow("faceHist", cdf[face]);
+	# cv2.waitKey(0);
 	cv2.imshow("face", face);
 	cv2.waitKey(0);
-	featureImage.append(local_binary_pattern(face, no_points, radius, method='ror'))
+	# featureImage.append(local_binary_pattern(face, no_points, radius, method='ror'))
 	
 for face in featureImage:
 	cv2.imshow("features",face)
